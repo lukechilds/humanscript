@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+
+# Setup filesystem
+DATA_DIR="${HOME}/.humanscript"
+CONFIG_FILE="${DATA_DIR}/config"
+CACHE_DIR="${DATA_DIR}/cache"
+mkdir -p "${CACHE_DIR}"
+touch "${CONFIG_FILE}"
+
+# Load settings
+source "${CONFIG_FILE}"
+
+# Defaults
+HUMANSCRIPT_API_KEY="${HUMANSCRIPT_API_KEY:-"sk-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"}"
+HUMANSCRIPT_MODEL="${HUMANSCRIPT_MODEL:-"gpt-4"}"
+HUMANSCRIPT_API="${HUMANSCRIPT_API:-"https://api.openai.com"}"
+HUMANSCRIPT_EXECUTE="${HUMANSCRIPT_EXECUTE:-"true"}"
+HUMANSCRIPT_REGENERATE="${HUMANSCRIPT_REGENERATE:-"false"}"
+
+# System prompt
+PROMPT="
+You are humanscript, a human readable script interpreter, here are your rules:
+You read an input script consisting of human readable commands and convert it to a bash output script.
+You don't talk to humans, you only output fully valid bash.
+You always start the output script with the exact shebang \"#!/usr/bin/env bash\".
+You take care to provide portable code that runs well on both macos and linux systems.
+Lines in the input script starting with a '#' are comments and are ignored.
+You NEVER respond with markdown, only respond in pure bash.
+You NEVER explain anything about the script."
+
+# Read the script passed to the interpeter
+gptscript_path="${1}"
+[[ "${gptscript_path}" = "" ]] && echo "Must pass a humanscript" && exit 1
+gptscript=$(cat "${gptscript_path}")
+user_prompt="
+### Input script:
+$(cat "${gptscript_path}")
+
+### Output script:"
+
+# Execute from cache if we have a hit
+script_name=$(basename $gptscript_path)
+script_hash=$(echo $gptscript | openssl dgst -sha256 | sed 's/^.*= //')
+script_cache_path="${CACHE_DIR}/${script_name}-${script_hash}"
+[[ "$HUMANSCRIPT_REGENERATE" = "true" ]] && rm "${script_cache_path}" 2> /dev/null
+[[ -f "${script_cache_path}" ]] && exec bash "${script_cache_path}"
+
+# JSON encode strings
+stringified_system_prompt=$(echo "${PROMPT}"| jq -sRr @json)
+stringified_user_prompt=$(echo "${user_prompt}"| jq -sRr @json)
+
+# Format JSON payload
+data=$(echo '{
+    "model": "'$HUMANSCRIPT_MODEL'",
+    "messages": [{"role": "system", "content": '$stringified_system_prompt'},{"role": "user", "content": '$stringified_user_prompt'}],
+    "temperature": 0.7,
+    "max_tokens": 1000,
+    "stream": true
+}' | jq)
+
+# Send request and stream chunked responses back
+curl --silent --show-error "${HUMANSCRIPT_API}/v1/chat/completions" \
+    -H "Content-Type: application/json" \
+    -H "Authorization: Bearer $HUMANSCRIPT_API_KEY" \
+    -d "${data}" | \
+        sed 's/^data: //' | # Strip chunk header
+        sed '/^\[DONE\]/d' | # Strip end chunk
+        tee >(jq --join-output --unbuffered '.error // ""' >&2 || cat) | # Log API errors to stderr (without breaking the pipe)
+        jq --join-output --unbuffered '.choices[0].delta.content // ""' 2> /dev/null | # Grab content from JSON chunk
+        tee "${script_cache_path}" | # Cache result
+        ($HUMANSCRIPT_EXECUTE && exec bash || cat) # Pipe to bash (or stdout if HUMANSCRIPT_EXECUTE=false)
