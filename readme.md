@@ -8,8 +8,6 @@
 
 humanscript is an inferpreter. A script interpreter that uses a large language model to infer the meaning behind commands written in natural language. Human writeable commands are translated into code that is then executed on the fly. There is no predefined syntax, humanscripts just say what they want to happen, and when you execute them, it happens.
 
-The humanscript inferpreter supports a wide range of LLM backends. It can be used with cloud hosted LLMs like OpenAI's GTP-3.5 and GPT-4 or locally running open source LLMs like Llama 2.
-
 ## Example
 
 This is a humanscript called `todo`.
@@ -89,6 +87,8 @@ fi
 ```
 
 The code is streamed out of the LLM during inferpretation and executed line by line so execution is not blocked waiting for inference to finish. The generated code is cached on first run and will be executed instantly on subsequent runs, bypassing the need for reinferpretation.
+
+The humanscript inferpreter supports a wide range of LLM backends. It can be used with cloud hosted LLMs like OpenAI's GTP-3.5 and GPT-4 or locally running open source LLMs like Llama 2.
 
 ## Usage
 
