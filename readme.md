@@ -88,7 +88,7 @@ else
 fi
 ```
 
-The code is streamed out of the LLM during inferpretation and executed line by line so execution is not blocked waiting for inference to finish. The resulting code is cached and will be executed immediately the next time the humanscript is executed, bypassing the need for reinferpretation.
+The code is streamed out of the LLM during inferpretation and executed line by line so execution is not blocked waiting for inference to finish. The generated code is cached on first run and will be executed instantly on subsequent runs, bypassing the need for reinferpretation.
 
 ## Usage
 
