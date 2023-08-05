@@ -97,6 +97,10 @@ du -sh "$HOME/Screenshots"/* | sed "s|$HOME/Screenshots/||"
 
 The code is streamed out of the LLM during inferpretation and executed line by line so execution is not blocked waiting for inference to finish. The generated code is cached on first run and will be executed instantly on subsequent runs, bypassing the need for reinferpretation.
 
+You can see it in action here:
+
+![](demo.svg)
+
 ## Usage
 
 ### Install humanscript
