@@ -6,7 +6,7 @@
 
 > A truly natural scripting language
 
-humanscript is an inferpreter. A script interpreter that uses a large language model to infer the meaning behind commands written in natural language. Human writeable commands are translated into code that is then executed on the fly. There is no predefined syntax, humanscripts just say what they want to happen, and when you execute them, it happens.
+humanscript is an inferpreter. A script interpreter that infers the meaning behind commands written in natural language using large language models. Human writeable commands are translated into code that is then executed on the fly. There is no predefined syntax, humanscripts just say what they want to happen, and when you execute them, it happens.
 
 ## Example
 
