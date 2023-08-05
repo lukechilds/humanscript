@@ -52,11 +52,9 @@ $(cat "${humanscript_path}")
 
 ### Output script:"
 
-# JSON encode strings
+# Format JSON payload
 stringified_system_prompt=$(echo "${system_prompt}"| jq -sRr @json)
 stringified_user_prompt=$(echo "${user_prompt}"| jq -sRr @json)
-
-# Format JSON payload
 data=$(echo '{
     "model": "'$HUMANSCRIPT_MODEL'",
     "messages": [{"role": "system", "content": '$stringified_system_prompt'},{"role": "user", "content": '$stringified_user_prompt'}],
