@@ -140,7 +140,19 @@ And then execute it.
 
 ## Configuration
 
-The following environment variables can be added to `~/.humanscript/config` to be globally applied to all humanscripts.
+The following environment variables can be added to `~/.humanscript/config` to be applied globally to all humanscripts like:
+
+```shell
+$ cat ~/.humanscript/config
+HUMANSCRIPT_API_KEY="sk-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+HUMANSCRIPT_MODEL="gpt-4"
+```
+
+or on a per script basis like:
+
+```shell
+$ HUMANSCRIPT_REGENERATE="true" ./asciiman
+```
 
 ### `HUMANSCRIPT_API`
 
