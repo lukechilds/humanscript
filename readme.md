@@ -112,7 +112,7 @@ brew install lukechilds/tap/humanscript
 
 Or manually install by downloading this repository and copy/symlink `humanscript` into your PATH.
 
-> Be careful if you're running humanscript unsandboxed. It can sometimes do weird and dangerous things. If you're brave enough to run unsandboxed it's a good idea to run humanscripts initially with `HUMANSCRIPT_EXECUTE="false"` to eyeball the resulting code.
+> Be careful if you're running humanscript unsandboxed. It can sometimes do weird and dangerous things. If you're brave enough to run unsandboxed it's a good idea to run humanscripts initially with `HUMANSCRIPT_EXECUTE="false"` so you can check the resulting code before executing.
 
 ### Write and execute a humanscript
 
