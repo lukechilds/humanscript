@@ -12,29 +12,54 @@ The humanscript inferpreter supports a wide range of LLM backends. It can be use
 
 ## Example
 
-This is a humanscript called `bitcoin-poem`.
+This is a humanscript called `todo`.
 
 ```shell
 #!/usr/bin/env humanscript
 
-write a poem
+get the first command-line argument as the action
 
-print the poem
+get everything after the first command-line argument as the task
 
-get the latest bitcoin blockhash from the mempool api
+ensure the todo file exists at $HOME/.todo.txt
 
-hash the poem and the blockhash together
+if action is "add"
+  append the task to the todo file
+  print "Task added successfully."
 
-print the blockhash, and the combined hash
+if action is "complete"
+  remove the task from the todo file
+  print "Task marked as complete."
+
+if action is "list"
+  read the tasks from the todo file
+  print "Pending tasks:"
+  list the tasks
+
+if no action was set
+  print "Invalid action. Usage: ./todo [add|complete|list] [task]"
 ```
 
 It can be executed like any other script.
 
 ```shell
-$ ./bitcoin-poem
-Poem: Roses are red, violets are blue. Bitcoin is volatile, and that is true
-Bitcoin Blockhash: 0000000000000000000413b966555eee6794dac502ac66ec88d7e752ffec8a4b
-Combined hash: ad69015c2f43d86b2d3247b78c81d9bb8f38e453a05d6fd264f42c44d74390e4
+$ ./todo add buy milk
+Task added successfully.
+
+$ ./todo add buy eggs
+Task added successfully.
+
+$ ./todo list
+Pending tasks:
+buy milk
+buy eggs
+
+$ ./todo complete buy eggs
+Task marked as complete.
+
+$ ./todo list
+Pending tasks:
+buy milk
 ```
 
 The LLM inferpreted the humanscript into the following bash script at runtime.
@@ -42,16 +67,25 @@ The LLM inferpreted the humanscript into the following bash script at runtime.
 ```shell
 #!/usr/bin/env bash
 
-poem="Roses are red, violets are blue. Bitcoin is volatile, and that is true"
+action=$1
+shift
+task="$@"
 
-echo "Poem: $poem"
+todo_file="$HOME/.todo.txt"
+touch "$todo_file"
 
-blockhash=$(curl -s https://mempool.space/api/blocks/tip/hash)
-
-combined_hash=$(echo -n "$poem$blockhash" | sha256sum | cut -d ' ' -f1)
-
-echo "Bitcoin Blockhash: $blockhash"
-echo "Combined hash: $combined_hash"
+if [ "$action" = "add" ]; then
+    echo "$task" >> "$todo_file"
+    echo "Task added successfully."
+elif [ "$action" = "complete" ]; then
+    sed -i.bak "/$task/d" "$todo_file"
+    echo "Task marked as complete."
+elif [ "$action" = "list" ]; then
+    echo "Pending tasks:"
+    cat "$todo_file"
+else
+    echo "Invalid action. Usage: ./todo [add|complete|list] [task]"
+fi
 ```
 
 The code is streamed out of the LLM during inferpretation and executed line by line so execution is not blocked waiting for inference to finish. The resulting code is cached and will be executed immediately the next time the humanscript is executed, bypassing the need for reinferpretation.
