@@ -17,8 +17,29 @@ HUMANSCRIPT_API="${HUMANSCRIPT_API:-"https://api.openai.com"}"
 HUMANSCRIPT_EXECUTE="${HUMANSCRIPT_EXECUTE:-"true"}"
 HUMANSCRIPT_REGENERATE="${HUMANSCRIPT_REGENERATE:-"false"}"
 
+# Read the script passed to the interpeter
+gptscript_path="${1}"
+[[ "${gptscript_path}" = "" ]] && echo "Must pass a humanscript" && exit 1
+gptscript=$(cat "${gptscript_path}")
+
+# Execute from cache if we have a hit
+script_name=$(basename $gptscript_path)
+script_hash=$(echo $gptscript | openssl dgst -sha256 | sed 's/^.*= //')
+script_cache_path="${CACHE_DIR}/${script_name}-${script_hash}"
+[[ "${HUMANSCRIPT_REGENERATE}" = "true" ]] && rm "${script_cache_path}" 2> /dev/null
+if [[ -f "${script_cache_path}" ]]
+then
+    if [[ "${HUMANSCRIPT_EXECUTE}" = "true" ]]
+    then
+        exec bash "${script_cache_path}"
+    else
+        cat "${script_cache_path}"
+        exit
+    fi
+fi
+
 # System prompt
-PROMPT="
+system_prompt="
 You are humanscript, a human readable script interpreter, here are your rules:
 You read an input script consisting of human readable commands and convert it to a bash output script.
 You don't talk to humans, you only output fully valid bash.
@@ -28,25 +49,15 @@ Lines in the input script starting with a '#' are comments and are ignored.
 You NEVER respond with markdown, only respond in pure bash.
 You NEVER explain anything about the script."
 
-# Read the script passed to the interpeter
-gptscript_path="${1}"
-[[ "${gptscript_path}" = "" ]] && echo "Must pass a humanscript" && exit 1
-gptscript=$(cat "${gptscript_path}")
+# User prompt
 user_prompt="
 ### Input script:
 $(cat "${gptscript_path}")
 
 ### Output script:"
 
-# Execute from cache if we have a hit
-script_name=$(basename $gptscript_path)
-script_hash=$(echo $gptscript | openssl dgst -sha256 | sed 's/^.*= //')
-script_cache_path="${CACHE_DIR}/${script_name}-${script_hash}"
-[[ "$HUMANSCRIPT_REGENERATE" = "true" ]] && rm "${script_cache_path}" 2> /dev/null
-[[ -f "${script_cache_path}" ]] && exec bash "${script_cache_path}"
-
 # JSON encode strings
-stringified_system_prompt=$(echo "${PROMPT}"| jq -sRr @json)
+stringified_system_prompt=$(echo "${system_prompt}"| jq -sRr @json)
 stringified_user_prompt=$(echo "${user_prompt}"| jq -sRr @json)
 
 # Format JSON payload
