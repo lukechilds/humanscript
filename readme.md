@@ -67,7 +67,7 @@ docker run -it ghcr.io/lukechilds/humanscript
 Alternatively you can install it natively on your system with Homebrew:
 
 ```shell
-brew install lukechilds/humanscript/humanscript
+brew install lukechilds/tap/humanscript
 ```
 
 Or manually install by downloading this repository and copy/symlink `humanscript` into your PATH.
