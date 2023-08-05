@@ -29,13 +29,9 @@ script_cache_path="${CACHE_DIR}/${script_name}-${script_hash}"
 [[ "${HUMANSCRIPT_REGENERATE}" = "true" ]] && rm "${script_cache_path}" 2> /dev/null
 if [[ -f "${script_cache_path}" ]]
 then
-    if [[ "${HUMANSCRIPT_EXECUTE}" = "true" ]]
-    then
-        exec bash "${script_cache_path}"
-    else
-        cat "${script_cache_path}"
-        exit
-    fi
+    [[ "${HUMANSCRIPT_EXECUTE}" = "true" ]] && exec bash "${script_cache_path}"
+    cat "${script_cache_path}"
+    exit
 fi
 
 # System prompt
@@ -79,4 +75,4 @@ curl --silent --show-error "${HUMANSCRIPT_API}/v1/chat/completions" \
         tee >(jq --join-output --unbuffered '.error // ""' >&2 || cat) | # Log API errors to stderr (without breaking the pipe)
         jq --join-output --unbuffered '.choices[0].delta.content // ""' 2> /dev/null | # Grab content from JSON chunk
         tee "${script_cache_path}" | # Cache result
-        ($HUMANSCRIPT_EXECUTE && exec bash || cat) # Pipe to bash (or stdout if HUMANSCRIPT_EXECUTE=false)
+        ([[ "${HUMANSCRIPT_EXECUTE}" = "true" ]] && exec bash || cat) # Pipe to bash (or stdout if HUMANSCRIPT_EXECUTE=false)
