@@ -13,7 +13,7 @@ source "${CONFIG_FILE}"
 # Defaults
 HUMANSCRIPT_API_KEY="${HUMANSCRIPT_API_KEY:-"sk-XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"}"
 HUMANSCRIPT_MODEL="${HUMANSCRIPT_MODEL:-"gpt-4"}"
-HUMANSCRIPT_API="${HUMANSCRIPT_API:-"https://api.openai.com"}"
+HUMANSCRIPT_API="${HUMANSCRIPT_API:-"https://api.openai.com/v1"}"
 HUMANSCRIPT_EXECUTE="${HUMANSCRIPT_EXECUTE:-"true"}"
 HUMANSCRIPT_REGENERATE="${HUMANSCRIPT_REGENERATE:-"false"}"
 
@@ -67,7 +67,7 @@ data=$(echo '{
 }' | jq)
 
 # Send request and stream chunked responses back
-curl --silent --show-error "${HUMANSCRIPT_API}/v1/chat/completions" \
+curl --silent --show-error "${HUMANSCRIPT_API}/chat/completions" \
     --header "Content-Type: application/json" \
     --header "Authorization: Bearer ${HUMANSCRIPT_API_KEY}" \
     --data "${data}" | \

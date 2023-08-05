@@ -160,14 +160,14 @@ $ HUMANSCRIPT_REGENERATE="true" ./asciiman
 
 ### `HUMANSCRIPT_API`
 
-Default: `https://api.openai.com`
+Default: `https://api.openai.com/v1`
 
 A server following OpenAI's Chat Completion API.
 
 Many local proxies exist that implement this API in front of locally running LLMs like Llama 2. [LM Studio](https://lmstudio.ai/) is a good option.
 
 ```shell
-HUMANSCRIPT_API="http://localhost:1234"
+HUMANSCRIPT_API="http://localhost:1234/v1"
 ```
 
 ### `HUMANSCRIPT_API_KEY`
