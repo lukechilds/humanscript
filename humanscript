@@ -18,13 +18,13 @@ HUMANSCRIPT_EXECUTE="${HUMANSCRIPT_EXECUTE:-"true"}"
 HUMANSCRIPT_REGENERATE="${HUMANSCRIPT_REGENERATE:-"false"}"
 
 # Read the script passed to the interpeter
-gptscript_path="${1}"
-[[ "${gptscript_path}" = "" ]] && echo "Must pass a humanscript" && exit 1
-gptscript=$(cat "${gptscript_path}")
+humanscript_path="${1}"
+[[ "${humanscript_path}" = "" ]] && echo "Must pass a humanscript" && exit 1
+humanscript=$(cat "${humanscript_path}")
 
 # Execute from cache if we have a hit
-script_name=$(basename $gptscript_path)
-script_hash=$(echo $gptscript | openssl dgst -sha256 | sed 's/^.*= //')
+script_name=$(basename $humanscript_path)
+script_hash=$(echo $humanscript | openssl dgst -sha256 | sed 's/^.*= //')
 script_cache_path="${CACHE_DIR}/${script_name}-${script_hash}"
 [[ "${HUMANSCRIPT_REGENERATE}" = "true" ]] && rm "${script_cache_path}" 2> /dev/null
 if [[ -f "${script_cache_path}" ]]
@@ -48,7 +48,7 @@ You NEVER explain anything about the script."
 # User prompt
 user_prompt="
 ### Input script:
-$(cat "${gptscript_path}")
+$(cat "${humanscript_path}")
 
 ### Output script:"
 
