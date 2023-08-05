@@ -10,53 +10,51 @@ humanscript is an inferpreter. A script interpreter that infers the meaning behi
 
 ## Example
 
-This is a humanscript called `todo`.
+This is a humanscript called `tidy-screenshots`.
 
 ```shell
 #!/usr/bin/env humanscript
 
-get the first command-line argument as the action
+loop over all files (ignoring directories) in $HOME/Screenshots
 
-get everything after the first command-line argument as the task
+move each file into a subdirectory in the format year-month
 
-ensure the todo file exists at $HOME/.todo.txt
+while the task is running show an ascii loading spinner
 
-if action is "add"
-  append the task to the todo file
-  show a success message
+show how many files where moved
 
-if action is "complete"
-  mark the task as complete
-  show a success message
-
-if action is "list"
-  print each task
-    prepend completed tasks with an ascii tick
-    prepend uncompleted tasks with an ascii bullet point
-
-if no action was set
-  print "Invalid action. Usage: ./todo [add|complete|list] [task]"
+show the size of each subdirectory ordered smallest first
 ```
 
 It can be executed like any other script.
 
 ```shell
-$ ./todo add buy milk
-Task added successfully.
-
-$ ./todo add buy eggs
-Task added successfully.
-
-$ ./todo list
-• buy milk
-• buy eggs
-
-$ ./todo complete buy eggs
-Task marked as complete.
-
-$ ./todo list
-• buy milk
-✓ buy eggs
+$ ./tidy-screenshots
+593 files were moved.
+364K    2023-08
+2.3M    2023-02
+5.4M    2022-09
+5.9M    2023-03
+6.9M    2022-07
+7.4M    2023-04
+11M     2023-01
+13M     2022-01
+13M     2022-10
+14M     2022-03
+16M     2022-11
+16M     2022-12
+18M     2022-02
+20M     2021-11
+20M     2021-12
+23M     2022-05
+24M     2021-09
+29M     2023-07
+30M     2023-06
+31M     2022-04
+31M     2023-05
+36M     2022-06
+38M     2021-10
+67M     2022-08
 ```
 
 The LLM inferpreted the humanscript into the following bash script at runtime.
@@ -64,30 +62,47 @@ The LLM inferpreted the humanscript into the following bash script at runtime.
 ```shell
 #!/usr/bin/env bash
 
-action=$1
-shift
-task="$@"
+# Variables
+DIR="$HOME/Screenshots"
+COUNTER=0
 
-todo_file="$HOME/.todo.txt"
-touch "$todo_file"
+# Spinner setup
+spinner=("⠋" "⠙" "⠹" "⠸" "⠼" "⠴" "⠦" "⠧" "⠇" "⠏")
+spin() {
+  # Hide cursor
+  echo -ne "\e[?25l"
+  while :; do
+    for i in "${spinner[@]}"; do
+      echo -ne "\r$i"
+      sleep 0.1
+    done
+  done
+}
 
-if [ "$action" == "add" ]; then
-  echo "$task" >> "$todo_file"
-  echo "Task added successfully."
-elif [ "$action" == "complete" ]; then
-  sed -i "s/^$task$/✓ $task/" "$todo_file"
-  echo "Task marked as complete."
-elif [ "$action" == "list" ]; then
-  while IFS= read -r line; do
-    if [[ $line == ✓* ]]; then
-      echo "$line"
-    else
-      echo "• $line"
-    fi
-  done < "$todo_file"
-else
-  echo "Invalid action. Usage: ./todo [add|complete|list] [task]"
-fi
+# Start the spinner in the background
+spin &
+SPIN_PID=$!
+
+# Loop over files
+for FILE in "$DIR"/*; do
+  if [[ -f "$FILE" ]]; then
+    YEAR_MONTH=$(date -r "$FILE" "+%Y-%m")
+    mkdir -p "$DIR/$YEAR_MONTH"
+    mv "$FILE" "$DIR/$YEAR_MONTH/"
+    ((COUNTER++))
+  fi
+done
+
+# Stop the spinner
+kill $SPIN_PID
+echo -ne "\e[?25h"
+echo -ne "\r"
+
+# Output the number of moved files
+echo "$COUNTER files were moved."
+
+# Show the size of each subdirectory
+du -sh "$DIR"/* | sort -h | sed "s|$DIR/||"
 ```
 
 The code is streamed out of the LLM during inferpretation and executed line by line so execution is not blocked waiting for inference to finish. The generated code is cached on first run and will be executed instantly on subsequent runs, bypassing the need for reinferpretation.
