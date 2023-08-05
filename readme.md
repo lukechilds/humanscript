@@ -211,7 +211,7 @@ Default: `false`
 
 Whether or not the humanscript inferpreter should regenerate a cached humanscript.
 
-If true the humanscript will be reinferpreted and the cache entry will be replaced with the newly generated code.
+If true the humanscript will be reinferpreted and the cache entry will be replaced with the newly generated code. Due to the nondeterministic nature of LLMs each time you reinferpret a humanscript you will get a similar but slightly different output.
 
 ```shell
 HUMANSCRIPT_REGENERATE="true"
