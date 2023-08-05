@@ -8,9 +8,11 @@
 
 humanscript is an inferpreter. A script interpreter that infers the meaning behind commands written in natural language using large language models. Human writeable commands are translated into code that is then executed on the fly. There is no predefined syntax, humanscripts just say what they want to happen, and when you execute them, it happens.
 
+The humanscript inferpreter supports a wide range of LLM backends. It can be used with cloud hosted LLMs like OpenAI's GTP-3.5 and GPT-4 or locally running open source LLMs like Llama 2.
+
 ## Example
 
-This is a humanscript called `tidy-screenshots`.
+This is a humanscript called `tidy-screenshots`. It takes an unorganised directory of screenshots and organises them into directories based on the month the screenshot was taken.
 
 ```shell
 #!/usr/bin/env humanscript
@@ -23,38 +25,38 @@ while the task is running show an ascii loading spinner
 
 show how many files where moved
 
-show the size of each subdirectory ordered smallest first
+show the size of each subdirectory
 ```
 
 It can be executed like any other script.
 
 ```shell
 $ ./tidy-screenshots
-593 files were moved.
+Moved 593 files.
 364K    2023-08
 2.3M    2023-02
 5.4M    2022-09
-5.9M    2023-03
+5.8M    2023-03
 6.9M    2022-07
 7.4M    2023-04
-11M     2023-01
-13M     2022-01
-13M     2022-10
-14M     2022-03
-16M     2022-11
-16M     2022-12
-18M     2022-02
-20M     2021-11
-20M     2021-12
-23M     2022-05
-24M     2021-09
-29M     2023-07
-30M     2023-06
-31M     2022-04
-31M     2023-05
-36M     2022-06
-38M     2021-10
-67M     2022-08
+ 10M    2023-01
+ 12M    2022-01
+ 13M    2022-10
+ 14M    2022-03
+ 16M    2022-11
+ 16M    2022-12
+ 18M    2022-02
+ 19M    2021-11
+ 20M    2021-12
+ 23M    2021-09
+ 23M    2022-05
+ 28M    2023-07
+ 30M    2022-04
+ 30M    2023-05
+ 30M    2023-06
+ 35M    2022-06
+ 38M    2021-10
+ 66M    2022-08
 ```
 
 The LLM inferpreted the humanscript into the following bash script at runtime.
@@ -62,52 +64,38 @@ The LLM inferpreted the humanscript into the following bash script at runtime.
 ```shell
 #!/usr/bin/env bash
 
-# Variables
-DIR="$HOME/Screenshots"
-COUNTER=0
-
-# Spinner setup
-spinner=("⠋" "⠙" "⠹" "⠸" "⠼" "⠴" "⠦" "⠧" "⠇" "⠏")
-spin() {
-  # Hide cursor
-  echo -ne "\e[?25l"
-  while :; do
-    for i in "${spinner[@]}"; do
-      echo -ne "\r$i"
-      sleep 0.1
+spinner() {
+    local i sp n
+    sp='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
+    n=${#sp}
+    while sleep 0.1; do
+        printf "%s\r" "${sp:i++%n:1}"
     done
-  done
 }
 
-# Start the spinner in the background
-spin &
-SPIN_PID=$!
+spinner &
 
-# Loop over files
-for FILE in "$DIR"/*; do
-  if [[ -f "$FILE" ]]; then
-    YEAR_MONTH=$(date -r "$FILE" "+%Y-%m")
-    mkdir -p "$DIR/$YEAR_MONTH"
-    mv "$FILE" "$DIR/$YEAR_MONTH/"
-    ((COUNTER++))
-  fi
+spinner_pid=$!
+
+moved_count=0
+
+for file in "$HOME/Screenshots"/*; do
+    if [ -f "$file" ]; then
+        dir="$HOME/Screenshots/$(date -r "$file" "+%Y-%m")"
+        mkdir -p "$dir"
+        mv "$file" "$dir"
+        ((moved_count++))
+    fi
 done
 
-# Stop the spinner
-kill $SPIN_PID
-echo -ne "\e[?25h"
-echo -ne "\r"
+kill "$spinner_pid"
 
-# Output the number of moved files
-echo "$COUNTER files were moved."
+echo "Moved $moved_count files."
 
-# Show the size of each subdirectory
-du -sh "$DIR"/* | sort -h | sed "s|$DIR/||"
+du -sh "$HOME/Screenshots"/* | sed "s|$HOME/Screenshots/||"
 ```
 
 The code is streamed out of the LLM during inferpretation and executed line by line so execution is not blocked waiting for inference to finish. The generated code is cached on first run and will be executed instantly on subsequent runs, bypassing the need for reinferpretation.
-
-The humanscript inferpreter supports a wide range of LLM backends. It can be used with cloud hosted LLMs like OpenAI's GTP-3.5 and GPT-4 or locally running open source LLMs like Llama 2.
 
 ## Usage
 
