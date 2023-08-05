@@ -8,7 +8,7 @@
 
 humanscript is an inferpreter. A script interpreter that uses a large language model to infer the meaning behind commands written in natural language. Human writeable commands are translated into code that is then executed on the fly. There is no predefined syntax, humanscripts just say what they want to happen, and when you execute them, it happens.
 
-The humanscript inferpreter supports a wide range of LLM backends. It can be used with cloud hosted LLMs like OpenAI's GTP-3.5 and GPT-4. It can also be used with open source LLMs running on your local machine like Llama 2.
+The humanscript inferpreter supports a wide range of LLM backends. It can be used with cloud hosted LLMs like OpenAI's GTP-3.5 and GPT-4 or locally running open source LLMs like Llama 2.
 
 ## Example
 
@@ -37,7 +37,7 @@ Bitcoin Blockhash: 0000000000000000000413b966555eee6794dac502ac66ec88d7e752ffec8
 Combined hash: ad69015c2f43d86b2d3247b78c81d9bb8f38e453a05d6fd264f42c44d74390e4
 ```
 
-The LLM inferpreted the humanscript into this bash script.
+The LLM inferpreted the humanscript into the following bash script at runtime.
 
 ```shell
 #!/usr/bin/env bash
@@ -53,6 +53,8 @@ combined_hash=$(echo -n "$poem$blockhash" | sha256sum | cut -d ' ' -f1)
 echo "Bitcoin Blockhash: $blockhash"
 echo "Combined hash: $combined_hash"
 ```
+
+The code is streamed out of the LLM during inferpretation and executed line by line so execution is not blocked waiting for inference to finish. The resulting code is cached and will be executed immediately next time the humanscript is executed, bypassing the need for reinferpretation.
 
 ## Usage
 
@@ -72,7 +74,9 @@ brew install lukechilds/tap/humanscript
 
 Or manually install by downloading this repository and copy/symlink `humanscript` into your PATH.
 
-### OpenAI
+> Be careful if you're running humanscript unsandboxed. It can sometimes do weird and dangerous things. If you're brave enough to run unsandboxed it's a good idea to run humanscripts initially with `HUMANSCRIPT_EXECUTE="false"` to eyeball the resulting code.
+
+### Write and execute a humanscript
 
 humanscript is configured out of the box to use OpenAI's GPT-4, you just need to add your API key.
 
@@ -86,39 +90,19 @@ echo 'HUMANSCRIPT_API_KEY="<your-openai-api-key>"' >> ~/.humanscript/config
 Now you can create a humanscript and make it executable.
 
 ```shell
-echo '#!/usr/bin/env humanscript' >> my-humanscript
-echo 'print an ascii art human' >> my-humanscript
-chmod +x my-humanscript
+echo '#!/usr/bin/env humanscript
+print an ascii art human' > asciiman
+chmod +x asciiman
 ```
 
-And then run it.
+And then execute it.
 
 ```shell
-./my-humanscript
+./asciiman
   O
  /|\
  / \
 ```
-
-### Local LLM
-
-TODO
-
-## How?
-
-TODO
-
-Due to the non-determinstic nature of LLMs each time you inferpret a humanscript, slightly different code will execute. To mitigate this inconvenience the humanscript inferpreter caches the generated code after the intial run and doesn't reinferpret the humanscript again until it is modified.
-
-During humanscript inferpretation the generated code is streamed out of the LLM and executed line by line. This means large scripts can be executed quickly because exection is not blocked waiting for the LLM inference to complete.
-
-## Why?
-
-I'm not sure.
-
-## Is this a joke?
-
-I don't know.
 
 ## Configuration
 
@@ -162,7 +146,7 @@ Default: `true`
 
 If the humanscript inferpreter should automatically execute the generated code on the fly.
 
-If false the generated code will be streamed to stdout.
+If false the generated code will not be executed and instead be streamed to stdout.
 
 ```shell
 HUMANSCRIPT_EXECUTE="false"
