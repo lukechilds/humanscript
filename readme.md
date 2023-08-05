@@ -190,7 +190,7 @@ HUMANSCRIPT_MODEL="gpt-3.5"
 
 Default: `true`
 
-If the humanscript inferpreter should automatically execute the generated code on the fly.
+Whether or not the humanscript inferpreter should automatically execute the generated code on the fly.
 
 If false the generated code will not be executed and instead be streamed to stdout.
 
@@ -202,7 +202,7 @@ HUMANSCRIPT_EXECUTE="false"
 
 Default: `false`
 
-If the humanscript inferpreter should regenerate a cached humanscript.
+Whether or not the humanscript inferpreter should regenerate a cached humanscript.
 
 If true the humanscript will be reinferpreted and the cache entry will be replaced with the newly generated code.
 
