@@ -57,7 +57,10 @@ stringified_system_prompt=$(echo "${system_prompt}"| jq -sRr @json)
 stringified_user_prompt=$(echo "${user_prompt}"| jq -sRr @json)
 data=$(echo '{
     "model": "'$HUMANSCRIPT_MODEL'",
-    "messages": [{"role": "system", "content": '$stringified_system_prompt'},{"role": "user", "content": '$stringified_user_prompt'}],
+    "messages": [
+        {"role": "system", "content": '$stringified_system_prompt'},
+        {"role": "user", "content": '$stringified_user_prompt'}
+    ],
     "temperature": 0.7,
     "max_tokens": 1000,
     "stream": true
