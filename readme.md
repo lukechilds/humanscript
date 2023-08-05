@@ -23,16 +23,16 @@ ensure the todo file exists at $HOME/.todo.txt
 
 if action is "add"
   append the task to the todo file
-  print "Task added successfully."
+  show a success message
 
 if action is "complete"
-  remove the task from the todo file
-  print "Task marked as complete."
+  mark the task as complete
+  show a success message
 
 if action is "list"
-  read the tasks from the todo file
-  print "Pending tasks:"
-  list the tasks
+  print each task
+    prepend completed tasks with an ascii tick
+    prepend uncompleted tasks with an ascii bullet point
 
 if no action was set
   print "Invalid action. Usage: ./todo [add|complete|list] [task]"
@@ -48,16 +48,15 @@ $ ./todo add buy eggs
 Task added successfully.
 
 $ ./todo list
-Pending tasks:
-buy milk
-buy eggs
+• buy milk
+• buy eggs
 
 $ ./todo complete buy eggs
 Task marked as complete.
 
 $ ./todo list
-Pending tasks:
-buy milk
+• buy milk
+✓ buy eggs
 ```
 
 The LLM inferpreted the humanscript into the following bash script at runtime.
@@ -72,17 +71,22 @@ task="$@"
 todo_file="$HOME/.todo.txt"
 touch "$todo_file"
 
-if [ "$action" = "add" ]; then
-    echo "$task" >> "$todo_file"
-    echo "Task added successfully."
-elif [ "$action" = "complete" ]; then
-    sed -i.bak "/$task/d" "$todo_file"
-    echo "Task marked as complete."
-elif [ "$action" = "list" ]; then
-    echo "Pending tasks:"
-    cat "$todo_file"
+if [ "$action" == "add" ]; then
+  echo "$task" >> "$todo_file"
+  echo "Task added successfully."
+elif [ "$action" == "complete" ]; then
+  sed -i "s/^$task$/✓ $task/" "$todo_file"
+  echo "Task marked as complete."
+elif [ "$action" == "list" ]; then
+  while IFS= read -r line; do
+    if [[ $line == ✓* ]]; then
+      echo "$line"
+    else
+      echo "• $line"
+    fi
+  done < "$todo_file"
 else
-    echo "Invalid action. Usage: ./todo [add|complete|list] [task]"
+  echo "Invalid action. Usage: ./todo [add|complete|list] [task]"
 fi
 ```
 
