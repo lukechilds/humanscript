@@ -58,7 +58,7 @@ echo "Combined hash: $combined_hash"
 
 ### Install humanscript
 
-You can run humanscript in a sandboxed environmnet via Docker:
+You can run humanscript in a sandboxed environment via Docker:
 
 ```shell
 docker run -it ghcr.io/lukechilds/humanscript
