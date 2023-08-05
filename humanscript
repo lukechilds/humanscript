@@ -71,9 +71,9 @@ data=$(echo '{
 
 # Send request and stream chunked responses back
 curl --silent --show-error "${HUMANSCRIPT_API}/v1/chat/completions" \
-    -H "Content-Type: application/json" \
-    -H "Authorization: Bearer $HUMANSCRIPT_API_KEY" \
-    -d "${data}" | \
+    --header "Content-Type: application/json" \
+    --header "Authorization: Bearer ${HUMANSCRIPT_API_KEY}" \
+    --data "${data}" | \
         sed 's/^data: //' | # Strip chunk header
         sed '/^\[DONE\]/d' | # Strip end chunk
         tee >(jq --join-output --unbuffered '.error // ""' >&2 || cat) | # Log API errors to stderr (without breaking the pipe)
