@@ -151,7 +151,7 @@ And then execute it.
 
 ## Configuration
 
-The following environment variables can be added to `~/.humanscript/config` to be applied globally to all humanscripts:
+All environment variables can be added to `~/.humanscript/config` to be applied globally to all humanscripts:
 
 ```shell
 $ cat ~/.humanscript/config
