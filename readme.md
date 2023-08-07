@@ -171,7 +171,11 @@ Default: `https://api.openai.com/v1`
 
 A server following OpenAI's Chat Completion API.
 
-Many local proxies exist that implement this API in front of locally running LLMs like Llama 2. [LM Studio](https://lmstudio.ai/) is a good option.
+Many local proxies exist that implement this API in front of locally running LLMs like Llama 2. 
+
+Available options:
+- [Prem App](https://premai.io/)
+- [LM Studio](https://lmstudio.ai/)
 
 ```shell
 HUMANSCRIPT_API="http://localhost:1234/v1"
