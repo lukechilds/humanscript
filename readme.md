@@ -108,7 +108,7 @@ You can see it in action here:
 You can run humanscript in a sandboxed environment via Docker:
 
 ```shell
-docker run -it ghcr.io/lukechilds/humanscript
+docker run -it lukechilds/humanscript
 ```
 
 Alternatively you can install it natively on your system with Homebrew:
