@@ -135,8 +135,7 @@ echo 'HUMANSCRIPT_API_KEY="<your-openai-api-key>"' >> ~/.humanscript/config
 Now you can create a humanscript and make it executable.
 
 ```shell
-echo '#!/usr/bin/env humanscript
-print an ascii art human' > asciiman
+echo '#!/usr/bin/env humanscript print an ascii art human' > asciiman
 chmod +x asciiman
 ```
 
